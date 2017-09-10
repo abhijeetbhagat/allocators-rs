@@ -16,7 +16,7 @@
 extern crate alloc;
 extern crate malloc_bind;
 use self::alloc::allocator::{Alloc, AllocErr, Layout};
-use self::malloc_bind::LayoutFinder;
+use self::malloc_bind::{LayoutFinder, Malloc};
 use super::general::global;
 use std::mem;
 
@@ -45,13 +45,15 @@ unsafe impl<'a> Alloc for &'a ElfMallocGlobal {
     }
 }
 
-impl<'a> LayoutFinder for &'a ElfMallocGlobal {
-    fn get_layout(&self, p: *mut u8) -> Layout {
+unsafe impl Malloc for ElfMallocGlobal {}
+
+unsafe impl LayoutFinder for ElfMallocGlobal {
+    unsafe fn get_layout(&self, p: *mut u8) -> Layout {
         // Note that per the current implementation of malloc-bind, we could just return a dummy
         // value, e.g.  Layout::from_size_align(8, 8).unwrap()
         // But, seeing as that (and `Alloc`'s default impl's internals) may change, we are going to
         // err on the side of caution for the time being
-        let (size, align) = unsafe { global::get_layout(p) };
+        let (size, align) = global::get_layout(p);
         Layout::from_size_align(size, align).unwrap()
     }
 }
