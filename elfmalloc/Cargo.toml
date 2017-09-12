@@ -35,6 +35,7 @@ print_stats = ["nightly"]
 bagpipe = "0.1.0"
 bsalloc = "0.1.0"
 lazy_static = "0.2"
+libc = "0.2"
 mmap-alloc = { path = "../mmap-alloc" }
 num_cpus = "1.5"
 log = "0.3.8"

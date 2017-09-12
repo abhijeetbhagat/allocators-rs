@@ -15,10 +15,13 @@
 
 extern crate alloc;
 extern crate malloc_bind;
+extern crate libc;
 use self::alloc::allocator::{Alloc, AllocErr, Layout};
 use self::malloc_bind::{LayoutFinder, Malloc};
 use super::general::global;
 use std::mem;
+
+use self::libc::{size_t, c_void};
 
 /// A zero-sized type used for implementing `Alloc` and `LayoutFinder` for the global instance of
 /// elfmalloc.
@@ -45,7 +48,14 @@ unsafe impl<'a> Alloc for &'a ElfMallocGlobal {
     }
 }
 
-unsafe impl Malloc for ElfMallocGlobal {}
+unsafe impl Malloc for ElfMallocGlobal {
+    unsafe fn c_malloc(&self, size: size_t) -> *mut c_void {
+        global::alloc(size as usize) as *mut c_void
+    }
+    unsafe fn c_free(&self, p: *mut c_void) {
+        global::free(p as *mut u8)
+    }
+}
 
 unsafe impl LayoutFinder for ElfMallocGlobal {
     unsafe fn get_layout(&self, p: *mut u8) -> Layout {
