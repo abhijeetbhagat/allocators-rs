@@ -55,6 +55,9 @@ unsafe impl Malloc for ElfMallocGlobal {
     unsafe fn c_free(&self, p: *mut c_void) {
         global::free(p as *mut u8)
     }
+    unsafe fn c_realloc(&self, p: *mut c_void, new_size: size_t) -> *mut c_void {
+        global::realloc(p as *mut u8, new_size as usize) as *mut c_void
+    }
 }
 
 unsafe impl LayoutFinder for ElfMallocGlobal {
